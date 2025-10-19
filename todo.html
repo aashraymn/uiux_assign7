@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do List</title>
+  <style>
+    /* Background & body */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 30px;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+    }
+
+    /* Form container */
+    form {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    input, textarea {
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      width: 100%;
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: #aaa;
+    }
+
+    button[type="submit"] {
+      background: #ff6a00;
+      border: none;
+      padding: 12px;
+      font-size: 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    button[type="submit"]:hover {
+      background: #e55d00;
+    }
+
+    /* Task List */
+    #taskList {
+      margin-top: 40px;
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .task {
+      background: rgba(255,255,255,0.15);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .task:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.3);
+    }
+
+    .task h3 {
+      font-size: 1.5rem;
+      color: #fff;
+      margin-bottom: 5px;
+    }
+
+    .task p {
+      color: #eee;
+    }
+
+    .task.completed h3,
+    .task.completed p {
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+
+    /* Task Buttons */
+    .task-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .task-buttons button {
+      flex: 1;
+      padding: 8px;
+      border-radius: 10px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: 0.3s;
+      color: #fff;
+    }
+
+    .complete-btn { background: #2ecc71; }
+    .complete-btn:hover { background: #27ae60; }
+
+    .edit-btn { background: #f1c40f; color: #222; }
+    .edit-btn:hover { background: #d4ac0d; }
+
+    .delete-btn { background: #e74c3c; }
+    .delete-btn:hover { background: #c0392b; }
+
+    /* Inputs when editing */
+    .task input, .task textarea {
+      border: none;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 16px;
+      width: 100%;
+    }
+
+    .task textarea { resize: vertical; }
+  </style>
+</head>
+<body>
+
+  <h1>To-Do List</h1>
+
+  <form id="taskForm">
+    <input type="text" id="taskTitle" placeholder="Task Title" required>
+    <textarea id="taskDesc" placeholder="Task Description" rows="3" required></textarea>
+    <button type="submit">Add Task</button>
+  </form>
+
+  <div id="taskList"></div>
+
+  <script>
+    const taskForm = document.getElementById('taskForm');
+    const taskList = document.getElementById('taskList');
+
+    taskForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const title = document.getElementById('taskTitle').value.trim();
+      const desc = document.getElementById('taskDesc').value.trim();
+      if(title && desc) {
+        addTask(title, desc);
+        taskForm.reset();
+      }
+    });
+
+    function addTask(title, desc) {
+      const taskDiv = document.createElement('div');
+      taskDiv.className = 'task';
+
+      const taskTitle = document.createElement('h3');
+      taskTitle.innerText = title;
+
+      const taskDesc = document.createElement('p');
+      taskDesc.innerText = desc;
+
+      const buttonsDiv = document.createElement('div');
+      buttonsDiv.className = 'task-buttons';
+
+      const completeBtn = document.createElement('button');
+      completeBtn.className = 'complete-btn';
+      completeBtn.innerText = 'Mark as Completed';
+      completeBtn.addEventListener('click', () => {
+        taskDiv.classList.toggle('completed');
+        completeBtn.innerText = taskDiv.classList.contains('completed') ? 'Mark as Incomplete' : 'Mark as Completed';
+      });
+
+      const editBtn = document.createElement('button');
+      editBtn.className = 'edit-btn';
+      editBtn.innerText = 'Edit';
+      editBtn.addEventListener('click', () => {
+        if(editBtn.innerText === 'Edit') {
+          const titleInput = document.createElement('input');
+          titleInput.type = 'text';
+          titleInput.value = taskTitle.innerText;
+
+          const descInput = document.createElement('textarea');
+          descInput.rows = 3;
+          descInput.value = taskDesc.innerText;
+
+          taskDiv.replaceChild(titleInput, taskTitle);
+          taskDiv.replaceChild(descInput, taskDesc);
+
+          editBtn.innerText = 'Save';
+        } else {
+          const titleInput = taskDiv.querySelector('input');
+          const descInput = taskDiv.querySelector('textarea');
+          taskTitle.innerText = titleInput.value;
+          taskDesc.innerText = descInput.value;
+          taskDiv.replaceChild(taskTitle, titleInput);
+          taskDiv.replaceChild(taskDesc, descInput);
+          editBtn.innerText = 'Edit';
+        }
+      });
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.innerText = 'Delete';
+      deleteBtn.addEventListener('click', () => {
+        taskList.removeChild(taskDiv);
+      });
+
+      buttonsDiv.appendChild(completeBtn);
+      buttonsDiv.appendChild(editBtn);
+      buttonsDiv.appendChild(deleteBtn);
+
+      taskDiv.appendChild(taskTitle);
+      taskDiv.appendChild(taskDesc);
+      taskDiv.appendChild(buttonsDiv);
+
+      taskList.appendChild(taskDiv);
+    }
+  </script>
+
+</body>
+</html>
